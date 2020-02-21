@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="padding: 20px; background-color:green;"> First article!</div>
+<a href="{% url 'index' %}">To the index page</a>
+
+<br> <br>
+
+{% for word in my_list_words %}
+{% if not word|length|divisibleby:"2" %}
+{% with word|length|stringformat:"i" as word_length %}
+<div>{{ word|add:" "|add:word_length }}</div>
+{% endwith %}
+{% endif %}
+{% endfor %}
+
+{% endblock %}

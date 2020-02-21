@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<br>
+<div>
+    <a href="{% url 'article' 2 %}" style="padding: 20px;">To the random article page</a>
+</div>
+<br>
+<div>
+    <a href="{% url 'article_slug' 'yuyu' %}" style="padding: 20px;">To the article page</a>
+</div>
+<br> <br>
+
+{% for item in my_list_digits %}
+{% if not item|divisibleby:"2" %}
+<div>{% widthratio item 1 2 %}</div>
+{% endif %}
+{% endfor %}
+
+{% endblock %}

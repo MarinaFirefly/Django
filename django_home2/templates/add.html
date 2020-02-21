@@ -1,0 +1,13 @@
+<div style="background-color: indianred;">
+    <div style="padding: 20px; "> That's included html!!!</div>
+
+    <div  style="padding: 20px;">
+        <a href="{% url 'index' %}" style="padding: 20px; ">To the index page</a>
+        <br><br>
+        <div>This is article {{article_id}}. </div>
+        {% if article_id|divisibleby:"2" %}
+            <div>It's even! </div>
+        {% else %}
+            <div>It's odd! </div>
+        {% endif %}
+    </div>
