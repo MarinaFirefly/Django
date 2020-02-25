@@ -1,4 +1,9 @@
-<div style="padding: 20px; background-color: chartreuse"> That's article page!!!</div>
-<div>
+{% extends 'base.html' %}
+{% block content %}
+
+<div style="padding: 20px; background-color: chartreuse"> It's article page!!!</div>
+<div style="padding: 20px;">
     <a href="{% url 'index' %}">To the index page</a>
 </div>
+
+{% endblock %}

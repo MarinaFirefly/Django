@@ -1,13 +1,19 @@
-<div style="background-color: indianred;">
-    <div style="padding: 20px; "> That's included html!!!</div>
+{% extends 'base.html' %}
+{% block content %}
 
-    <div  style="padding: 20px;">
-        <a href="{% url 'index' %}" style="padding: 20px; ">To the index page</a>
-        <br><br>
-        <div>This is article {{article_id}}. </div>
-        {% if article_id|divisibleby:"2" %}
-            <div>It's even! </div>
-        {% else %}
-            <div>It's odd! </div>
-        {% endif %}
+<div style="background-color: rgb(240, 184, 184);">
+    <div style="padding: 20px; border:2px solid gray;">
+        <div> It's included html!!!</div>
+        <br>
+        <div>
+            <a href="{% url 'index' %}">To the index page</a>
+            <br><br>
+            {% if article_id|divisibleby:"2" %}
+            <div>This is article {{article_id}}. It's even! </div>
+            {% else %}
+            <div>This is article {{article_id}}. It's odd! </div>
+            {% endif %}
+        </div>
     </div>
+
+{% endblock %}
