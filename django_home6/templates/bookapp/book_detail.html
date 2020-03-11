@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <p>{{object.article}}</p>
+    <p>{{object.author}}</p>
+    <p>{{object.text}}</p>
+{% endblock %}
+{% block links %}
+<a href="{% url 'index' %}">To main page</a>
+<a href="{% url 'book_create' %}">New book</a>
+<a href="{% url 'book_list' %}">List of the books</a>
+{% endblock %}

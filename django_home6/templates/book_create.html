@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+    <form action="{% url 'book_create' %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <br><br>
+        <input type="submit" value="Create" style="font-size: 20px; color:white; background-color: green;">
+    </form>
+{% endblock %}
+{% block links %}
+<a href="{% url 'index' %}">To main page</a>
+<a href="{% url 'book_list' %}">List of the books</a>
+{% endblock%}

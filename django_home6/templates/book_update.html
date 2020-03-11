@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<form action="{% url 'book_update' object.id %}" method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-4">Article: {{form.article}}</div>
+        <div class="col-4">Author: {{ form.author }}</div>
+        <div class="col-4">Text: {{ form.text }}</div>
+    </div>
+    <br><br>
+    <input type="submit" value="Update" style="font-size: 20px; color:white; background-color: green;">
+</form>
+{% endblock %}
+{% block links %}
+<a href="{% url 'index' %}">To main page</a>
+<a href="{% url 'book_create' %}">New book</a>
+<a href="{% url 'book_list' %}">List of the books</a>
+{% endblock%}
