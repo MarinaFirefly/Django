@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-6">
+<img src="../media/squirrel.jpg" style="height:360px; border: solid 1px rgb(61, 43, 28); border-radius:10px;">
+        </div>
+<div class="col-6" style="color:rgb(61, 43, 28); text-align:center; font-size:25px;">
+    <br><br><br><br>
+    <h2>We really like coffee :)</h2>
+</div>
+</div>
+{% endblock %}
+
+{% block links %}
+<a href="{% url 'index' %}">To main page</a>
+<a href="{% url 'products_list' %}">To list of products</a>
+{% endblock%}

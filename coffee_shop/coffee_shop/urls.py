@@ -17,18 +17,24 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from shop_app.views import Index, Login, Registration, Logout, ProductListView, ProductCreateView, ProductUpdateView, PurchaseCreateView
+import shop_app.views as cls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('login/', Login.as_view(), name='login'),
-    path('logout/', Logout.as_view(), name='logout'),
-    path('registration/', Registration.as_view(), name='registration'),
-    path('products_list/', ProductListView.as_view(), name='products_list'),
-    path('product_create/', ProductCreateView.as_view(), name='product_create'),
-    path('product_update/<int:pk>/', ProductUpdateView.as_view(), name='product_update'),
-    path('purchase_create/', PurchaseCreateView.as_view(), name='purchase_create'),
-    path('', Index.as_view(), name='index'),
+    path('login/', cls.Login.as_view(), name='login'),
+    path('logout/', cls.Logout.as_view(), name='logout'),
+    path('registration/', cls.Registration.as_view(), name='registration'),
+    path('products_list/', cls.ProductListView.as_view(), name='products_list'),
+    path('product_create/', cls.ProductCreateView.as_view(), name='product_create'),
+    path('product_update/<int:pk>/', cls.ProductUpdateView.as_view(), name='product_update'),
+    path('purchase_create/', cls.PurchaseCreateView.as_view(), name='purchase_create'),
+    path('purchase_update/<int:pk>/', cls.PurchaseUpdateView.as_view(), name='purchase_update'),
+    path('purchase_return/', cls.PurchaseReturnListView.as_view(), name='purchase_return'),
+    path('purchase_deleted/', cls.PurchaseReturnedListView.as_view(), name='purchase_deleted'),
+    path('purchase_deleting/<int:pk>/',cls.PurchaseReturnUpdateView.as_view(), name='purchase_deleting'),
+    path('basket/', cls.PurchaseListView.as_view(), name='basket'),
+    path('about_us/', cls.About.as_view(), name='about_us'),
+    path('', cls.Index.as_view(), name='index'),
 ]
 
 if settings.DEBUG:

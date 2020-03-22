@@ -15,9 +15,14 @@
     <div class="row"
          style="background-color: rgb(61, 43, 28); color: white; padding:20px; font-size:50px;">
         <div class="col-10" style="text-align:center;"> Coffee Shop</div>
-        <div class="col-2" style="text-align:center;">
+        <div class="col-1" style="text-align:center;">
             {% if request.user.is_authenticated %}
-            <i class="fas fa-shopping-basket"></i>
+            <a href="{% url 'basket' %}"><i class="fas fa-shopping-basket" style="color:white;"></i></a>
+            {% endif %}
+        </div>
+        <div class="col-1" style="text-align:center;">
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'purchase_return' %}"><i class="fas fa-undo" style="color:white;"></i></a>
             {% endif %}
         </div>
     </div>
@@ -55,7 +60,7 @@
 </header>
 <hr>
 <div style="color:rgb(61, 43, 28); text-align:left; font-size: 20px; border:2px solid rgb(61, 43, 28); border-radius:10px;
-margin: 0 100px 0 100px;">
+margin: 0 100px 0 100px; width:85%; position:fixed; top:175px; bottom:12%; height:370px;">
     {% block content %}
     {% endblock %}
 </div>

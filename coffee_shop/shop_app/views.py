@@ -1,12 +1,13 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.views.generic import CreateView, FormView, ListView, DeleteView, TemplateView, View, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, FormView, ListView, DeleteView, TemplateView, View, UpdateView
 
 from shop_app.forms import RegistrationForm, LoginForm, ProductForm, PurchaseForm
-from shop_app.models import Product, Purchase
+from shop_app.models import Customer, Product, Purchase
 
 
 class Index(TemplateView):
@@ -20,8 +21,11 @@ class Index(TemplateView):
         return context
 
 
+class About(TemplateView):
+    template_name = 'about_us.html'
+
+
 class Registration(CreateView):
-    # model = Customer
     form_class = RegistrationForm
     template_name = 'registration.html'
     success_url = '/'
@@ -41,8 +45,6 @@ class Login(FormView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # username = request.POST.get('username')
-        # password = request.POST.get('password')
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
 
@@ -55,7 +57,6 @@ class Login(FormView):
 class Logout(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         logout(request.user)
-        # return super().get(request, *args, **kwargs)
         return HttpResponseRedirect("/")
 
 
@@ -80,6 +81,13 @@ class ProductCreateView(CreateView):
     form_class = ProductForm
     success_url = reverse_lazy('product_create')
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.method.lower() in self.http_method_names and request.user.is_superuser:
+            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+        else:
+            handler = self.http_method_not_allowed
+        return handler(request, *args, **kwargs)
+
 
 class ProductUpdateView(UpdateView):
     model = Product
@@ -87,18 +95,114 @@ class ProductUpdateView(UpdateView):
     success_url = '../../products_list'
     fields = ['picture', 'title', 'text', 'price', 'quantity']
 
+    def dispatch(self, request, *args, **kwargs):
+        if request.method.lower() in self.http_method_names and request.user.is_superuser:
+            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+        else:
+            handler = self.http_method_not_allowed
+        return handler(request, *args, **kwargs)
 
-class PurchaseCreateView(CreateView):
+
+class PurchaseCreateView(LoginRequiredMixin, CreateView):
     http_method_names = ['post', ]
-    success_url = reverse_lazy('products_list/')
+    success_url = reverse_lazy('products_list')
     model = Purchase
     form_class = PurchaseForm
 
     def form_valid(self, form):
         obj = form.save(commit=False)
         obj.customer = self.request.user
-        obj.product = self.object.Product
+        obj.product = Product.objects.get(pk=self.request.POST.get("product", ""))
+        if not Purchase.check_cnt_available(obj):
+            messages.warning(self.request, "Entered quantity of product isn't present in the shop!")
+            return HttpResponseRedirect(' ../products_list')
+        if obj.customer.wallet < obj.cnt*obj.product.price:
+            messages.warning(self.request, "You haven't enough money!")
+            return HttpResponseRedirect('../products_list')
+        obj.customer.from_wallet(obj.cnt*obj.product.price)
+        obj.product.minus_prod(obj.cnt)
         self.object = obj.save()
         return super().form_valid(form)
 
+
+class PurchaseListView(LoginRequiredMixin, ListView):
+    model = Purchase
+    paginate_by = 8
+    template_name = 'basket.html'
+    queryset = Purchase.objects.all()
+    ordering = ['-create_at']
+
+    def get_queryset(self):
+        return Purchase.objects.filter(customer=self.request.user, returned=False)
+
+
+class PurchaseUpdateView(LoginRequiredMixin, UpdateView):
+    model = Purchase
+    success_url = reverse_lazy('basket')
+    http_method_names = ['post', ]
+    fields = ['to_return']
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.to_return = True
+        self.object = obj.save()
+        return super().form_valid(form)
+
+
+class PurchaseReturnListView(ListView):
+    model = Purchase
+    paginate_by = 8
+    template_name = 'purchase_return.html'
+    queryset = Purchase.objects.all()
+
+    def get_queryset(self):
+        return Purchase.objects.filter(to_return=True, returned=False)
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method.lower() in self.http_method_names and request.user.is_superuser:
+            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+        else:
+            handler = self.http_method_not_allowed
+        return handler(request, *args, **kwargs)
+
+
+class PurchaseReturnUpdateView(UpdateView):
+    model = Purchase
+    success_url = reverse_lazy('purchase_return')
+    http_method_names = ['post', ]
+    fields = ['returned', 'product', 'customer']
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method.lower() in self.http_method_names and request.user.is_superuser:
+            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+        else:
+            handler = self.http_method_not_allowed
+        return handler(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.returned = True
+        obj.product = Product.objects.get(pk=self.request.POST.get("product", ""))
+        obj.product.plus_prod(obj.cnt)
+        obj.customer = Customer.objects.get(pk=self.request.POST.get("customer", ''))
+        obj.customer.to_wallet(obj.cnt*obj.product.price)
+        self.object = obj.save()
+        return super().form_valid(form)
+
+
+class PurchaseReturnedListView(ListView):
+    model = Purchase
+    paginate_by = 8
+    template_name = 'purchase_deleted.html'
+    queryset = Purchase.objects.all()
+
+    def get_queryset(self):
+        return Purchase.objects.filter(returned=True)
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.method.lower() in self.http_method_names and request.user.is_superuser:
+            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
+        else:
+            handler = self.http_method_not_allowed
+        return handler(request, *args, **kwargs)
 

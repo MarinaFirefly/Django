@@ -25,3 +25,8 @@
     </div>
 </form>
 {% endblock %}
+
+{% block links %}
+<a href="{% url 'index' %}">To main page</a>
+<a href="{% url 'products_list' %}">To list of products</a>
+{% endblock%}

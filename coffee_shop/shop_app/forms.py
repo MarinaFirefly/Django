@@ -45,4 +45,4 @@ class ProductForm(forms.ModelForm):
 class PurchaseForm(forms.ModelForm):
     class Meta:
         model = Purchase
-        fields = ['cnt', ]
+        fields = ['cnt', 'product']
