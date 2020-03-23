@@ -102,10 +102,10 @@ class PurchaseCreateView(LoginRequiredMixin, CreateView):
         obj = form.save(commit=False)
         obj.customer = self.request.user
         obj.product = Product.objects.get(pk=self.request.POST.get("product", ""))
-        if not Purchase.check_cnt_available(obj):
+        if not obj.check_cnt_available:
             messages.warning(self.request, "Entered quantity of product isn't present in the shop!")
-            return HttpResponseRedirect(' ../products_list')
-        if obj.customer.wallet < obj.cnt*obj.product.price:
+            return HttpResponseRedirect('../products_list')
+        if obj.money_not_enough:
             messages.warning(self.request, "You haven't enough money!")
             return HttpResponseRedirect('../products_list')
         obj.customer.from_wallet(obj.cnt*obj.product.price)

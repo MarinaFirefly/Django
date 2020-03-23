@@ -1,20 +1,14 @@
 import datetime
-
+from django.contrib import messages
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.http import HttpResponseRedirect
 from django.utils import timezone
 
 class Customer(AbstractUser):
     def __str__(self):
         return "{}".format(self.username)
-
-    username = models.CharField(max_length=20, unique=True)
-    email = models.CharField(max_length=20, unique=True)
-    first_name = models.CharField(max_length=30, blank=True, null=True)
-    last_name = models.CharField(max_length=30, blank=True, null=True)
-    date_of_birth = models.DateField(blank=True, null=True)
     wallet = models.PositiveIntegerField(default=1000)
-    token = models.CharField(max_length=32, blank=True, null=True)
 
     def from_wallet(self, payment):
         self.wallet -= payment
@@ -50,8 +44,13 @@ class Purchase(models.Model):
     to_return = models.BooleanField(default=False, blank=True, null=True)
     returned = models.BooleanField(default=False, blank=True, null=True)
 
+    @property
     def check_cnt_available(self):
         return self.product.quantity >= self.cnt
+
+    @property
+    def money_not_enough(self):
+        return self.customer.wallet < self.cnt*self.product.price
 
     def is_returnable(self):
         return datetime.timedelta(minutes=3) > timezone.now() - self.create_at
