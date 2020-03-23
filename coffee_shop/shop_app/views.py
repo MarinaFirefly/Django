@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
@@ -8,6 +8,12 @@ from django.views.generic import CreateView, FormView, ListView, DeleteView, Tem
 
 from shop_app.forms import RegistrationForm, LoginForm, ProductForm, PurchaseForm
 from shop_app.models import Customer, Product, Purchase
+
+
+class SuperuserTestMixin(UserPassesTestMixin):
+    def test_func(self):
+        if self.request.user.is_superuser:
+            return True
 
 
 class Index(TemplateView):
@@ -41,9 +47,6 @@ class Login(FormView):
             return redirect('/')
         return super().get(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
-
     def form_valid(self, form):
         username = form.cleaned_data.get('username')
         password = form.cleaned_data.get('password')
@@ -56,7 +59,7 @@ class Login(FormView):
 
 class Logout(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        logout(request.user)
+        logout(request)
         return HttpResponseRedirect("/")
 
 
@@ -75,32 +78,18 @@ class ProductListView(ListView):
         return context
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(SuperuserTestMixin, CreateView):
     model = Product
     template_name = 'product_create.html'
     form_class = ProductForm
     success_url = reverse_lazy('product_create')
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.method.lower() in self.http_method_names and request.user.is_superuser:
-            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
-        else:
-            handler = self.http_method_not_allowed
-        return handler(request, *args, **kwargs)
 
-
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(SuperuserTestMixin, UpdateView):
     model = Product
     template_name = 'product_update.html'
-    success_url = '../../products_list'
+    success_url = reverse_lazy('products_list')
     fields = ['picture', 'title', 'text', 'price', 'quantity']
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.method.lower() in self.http_method_names and request.user.is_superuser:
-            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
-        else:
-            handler = self.http_method_not_allowed
-        return handler(request, *args, **kwargs)
 
 
 class PurchaseCreateView(LoginRequiredMixin, CreateView):
@@ -127,7 +116,7 @@ class PurchaseCreateView(LoginRequiredMixin, CreateView):
 
 class PurchaseListView(LoginRequiredMixin, ListView):
     model = Purchase
-    paginate_by = 8
+    paginate_by = 6
     template_name = 'basket.html'
     queryset = Purchase.objects.all()
     ordering = ['-create_at']
@@ -149,35 +138,22 @@ class PurchaseUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class PurchaseReturnListView(ListView):
+class PurchaseReturnListView(SuperuserTestMixin, ListView):
     model = Purchase
-    paginate_by = 8
+    paginate_by = 6
     template_name = 'purchase_return.html'
     queryset = Purchase.objects.all()
+    ordering = ['-create_at']
 
     def get_queryset(self):
         return Purchase.objects.filter(to_return=True, returned=False)
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.method.lower() in self.http_method_names and request.user.is_superuser:
-            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
-        else:
-            handler = self.http_method_not_allowed
-        return handler(request, *args, **kwargs)
 
-
-class PurchaseReturnUpdateView(UpdateView):
+class PurchaseReturnUpdateView(SuperuserTestMixin, UpdateView):
     model = Purchase
     success_url = reverse_lazy('purchase_return')
     http_method_names = ['post', ]
     fields = ['returned', 'product', 'customer']
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.method.lower() in self.http_method_names and request.user.is_superuser:
-            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
-        else:
-            handler = self.http_method_not_allowed
-        return handler(request, *args, **kwargs)
 
     def form_valid(self, form):
         obj = form.save(commit=False)
@@ -190,19 +166,12 @@ class PurchaseReturnUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class PurchaseReturnedListView(ListView):
+class PurchaseReturnedListView(SuperuserTestMixin, ListView):
     model = Purchase
-    paginate_by = 8
+    paginate_by = 6
     template_name = 'purchase_deleted.html'
     queryset = Purchase.objects.all()
+    ordering = ['-create_at']
 
     def get_queryset(self):
         return Purchase.objects.filter(returned=True)
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.method.lower() in self.http_method_names and request.user.is_superuser:
-            handler = getattr(self, request.method.lower(), self.http_method_not_allowed)
-        else:
-            handler = self.http_method_not_allowed
-        return handler(request, *args, **kwargs)
-

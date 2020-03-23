@@ -1,7 +1,8 @@
 import datetime
-from django.db import models
-from django.contrib.auth.models import AbstractUser
 
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from django.utils import timezone
 
 class Customer(AbstractUser):
     def __str__(self):
@@ -22,7 +23,7 @@ class Customer(AbstractUser):
     def to_wallet(self, return_money):
         self.wallet += return_money
         return self.save()
-    
+
 
 class Product(models.Model):
     picture = models.ImageField(max_length=100, blank=True, null=True)
@@ -45,6 +46,7 @@ class Purchase(models.Model):
     product = models.ForeignKey(Product, on_delete=models.DO_NOTHING, default=object)
     cnt = models.PositiveSmallIntegerField(default=0, blank=True, null=True)
     create_at = models.DateTimeField(auto_now_add=True)
+    update_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     to_return = models.BooleanField(default=False, blank=True, null=True)
     returned = models.BooleanField(default=False, blank=True, null=True)
 
@@ -52,5 +54,4 @@ class Purchase(models.Model):
         return self.product.quantity >= self.cnt
 
     def is_returnable(self):
-        return True
-            # datetime.timedelta(minutes=3) > datetime.datetime.now() - self.create_at
+        return datetime.timedelta(minutes=3) > timezone.now() - self.create_at

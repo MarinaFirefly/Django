@@ -21,7 +21,7 @@
             {% endif %}
         </div>
         <div class="col-1" style="text-align:center;">
-            {% if request.user.is_authenticated %}
+            {% if request.user.is_superuser %}
             <a href="{% url 'purchase_return' %}"><i class="fas fa-undo" style="color:white;"></i></a>
             {% endif %}
         </div>
