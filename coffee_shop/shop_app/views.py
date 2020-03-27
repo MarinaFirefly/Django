@@ -119,7 +119,6 @@ class PurchaseListView(LoginRequiredMixin, ListView):
     paginate_by = 6
     template_name = 'basket.html'
     queryset = Purchase.objects.all()
-    ordering = ['-create_at']
 
     def get_queryset(self):
         return Purchase.objects.filter(customer=self.request.user, returned=False)
@@ -143,7 +142,6 @@ class PurchaseReturnListView(SuperuserTestMixin, ListView):
     paginate_by = 6
     template_name = 'purchase_return.html'
     queryset = Purchase.objects.all()
-    ordering = ['-create_at']
 
     def get_queryset(self):
         return Purchase.objects.filter(to_return=True, returned=False)
@@ -171,7 +169,6 @@ class PurchaseReturnedListView(SuperuserTestMixin, ListView):
     paginate_by = 6
     template_name = 'purchase_deleted.html'
     queryset = Purchase.objects.all()
-    ordering = ['-create_at']
 
     def get_queryset(self):
         return Purchase.objects.filter(returned=True)

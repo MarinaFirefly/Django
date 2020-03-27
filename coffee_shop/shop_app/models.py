@@ -1,9 +1,8 @@
 import datetime
-from django.contrib import messages
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.http import HttpResponseRedirect
 from django.utils import timezone
+
 
 class Customer(AbstractUser):
     def __str__(self):
@@ -54,3 +53,6 @@ class Purchase(models.Model):
 
     def is_returnable(self):
         return datetime.timedelta(minutes=3) > timezone.now() - self.create_at
+
+    class Meta:
+        ordering = ['-create_at']

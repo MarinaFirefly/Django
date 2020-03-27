@@ -13,16 +13,16 @@
 <body style="background-color:rgb(255, 249, 246);">
 <header style="width:100%">
     <div class="row"
-         style="background-color: rgb(61, 43, 28); color: white; padding:20px; font-size:50px;">
-        <div class="col-10" style="text-align:center;"> Coffee Shop</div>
-        <div class="col-1" style="text-align:center;">
-            {% if request.user.is_authenticated %}
-            <a href="{% url 'basket' %}"><i class="fas fa-shopping-basket" style="color:white;"></i></a>
-            {% endif %}
-        </div>
-        <div class="col-1" style="text-align:center;">
+         style="background-color: rgb(43, 31, 21); color: white; font-size:50px; width:100%;">
+         <div class="col-1" style="text-align:center; padding:20px;">
             {% if request.user.is_superuser %}
             <a href="{% url 'purchase_return' %}"><i class="fas fa-undo" style="color:white;"></i></a>
+            {% endif %}
+        </div>
+        <div class="col-10" style="text-align:center; padding:10px; background-image:url(https://i.picsum.photos/id/766/1300/150.jpg); font-size:70px; font-weight: bold;"> Coffee Shop</div>
+        <div class="col-1" style="text-align:center; padding:20px;">
+            {% if request.user.is_authenticated %}
+            <a href="{% url 'basket' %}"><i class="fas fa-shopping-basket" style="color:white;"></i></a>
             {% endif %}
         </div>
     </div>
